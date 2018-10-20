@@ -63,6 +63,10 @@ body {
 	justify-content: center;
 }
 
+input, textarea, select, button {
+	font-family: 'Roboto Mono', monospace;
+}
+
 .panel {
 	margin: 40px 0;
 	width: 450px;
@@ -80,7 +84,7 @@ body {
 	color: #434343;
 	height: 140px;
 	width: 100%;
-	background: #47b2b2;
+	background: #7fffff;
 	border-radius: 3px;
 	margin-bottom: 30px;
 	padding: 8px 20px 20px 20px;
@@ -88,15 +92,26 @@ body {
 }
 
 .value {
-	font-size: 45px;
-	word-break: break-all;
+	color: transparent;
+	text-shadow: 0 0 0 black;
+	width: 100%;
+	font-size: 39px;
+	background: transparent;
+	text-align: right;
+	border: none;
+	outline: none;
 }
 
 .status {
+	color: transparent;
+	text-shadow: 0 0 0 black;
 	font-size: 16px;
 	position: absolute;
 	top: 10px;
 	left: 10px;
+	background: transparent;
+	border: none;
+	outline: none;
 }
 
 .button_group {
@@ -120,6 +135,12 @@ body {
 	border-radius: 3px;
 	background: #63636e;
 	box-shadow: 0px 1px 6px 1px rgba(0,0,0,0.8);
+	outline: none;
+}
+
+.custom_btn:active {
+	box-shadow: none;
+   	outline: none;
 }
 
 .bottom_right {
