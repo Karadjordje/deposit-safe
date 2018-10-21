@@ -1,18 +1,7 @@
 import React, { Component } from 'react';
 import './css/main.css';
-
-const SEGMENTS = {
-	BLANK: '',
-	ERROR: 'Error',
-	RECORD: 'Record',
-	READY: 'Ready',
-	LOCKING: 'Locking...',
-	UNLOCKING: 'Unlocking...',
-	SERVICE: 'Service',
-	VALIDATING: 'Validating...',
-};
-
-const serialNum = 4815162342;
+import Buttons from './components/Buttons';
+import {SEGMENTS, serialNum, base_url} from './constants.js';
 
 class App extends Component {
 	constructor(props) {
@@ -20,9 +9,10 @@ class App extends Component {
 		this.state = {
 			locked: false,
 			segment: '',
-			interface: '',
+			myinterface: '',
 			idle: false,
 			record: false,
+			block: false,
 			password: null,
 		};
 
@@ -41,11 +31,11 @@ class App extends Component {
 			idle: false,
 		};
 
-		clearTimeout(this.timeout);
-
-		if (this.state.blocking) {
+		if (this.state.block) {
 			return;
 		}
+
+		clearTimeout(this.timeout);
 
 		if (!locked) {
 			if (btnVal === 'R') {
@@ -53,27 +43,27 @@ class App extends Component {
 					record: true,
 				});
 				newState.segment = SEGMENTS.RECORD;
-				newState.interface = '';
+				newState.myinterface = '';
 			} else if (btnVal === 'L') {
-				if (this.state.interface.length !== 4) {
+				if (this.state.myinterface.length !== 4) {
 					this.setState({
 						record: false,
 					});
 					newState.segment = SEGMENTS.ERROR;
-					newState.interface = '';
+					newState.myinterface = '';
 				} else if(this.state.record) {
 					newState.segment = SEGMENTS.LOCKING;
 					newState.block = true;
-					newState.password = this.state.interface;
-					newState.interface = '';
+					newState.password = this.state.myinterface;
+					newState.myinterface = '';
 				}
 			} else {
-				newState.interface = this.state.interface + btnVal;
+				newState.myinterface = this.state.myinterface + btnVal;
 			}
 		} else {
-			newState.interface = this.state.interface + btnVal;
-
+			newState.myinterface = this.state.myinterface + btnVal;
 		}
+
 		this.setState(newState, this.runTimeout);
 		// unlocked
 			// record
@@ -124,10 +114,16 @@ class App extends Component {
 			this.timeout = setTimeout(function(){
 				if (this.state.locked) {
 					if (this.state.segment === SEGMENTS.SERVICE) {
-						if (this.state.interface !== '') {
-							const base_url = 'https://cors.io/?https://9w4qucosgf.execute-api.eu-central-1.amazonaws.com/default/CR-JS_team_M02a?';
-							let fetch_url = `${base_url}code=${this.state.interface}`;
-							// let fetch_url = `${base_url}code=456R987L0123`;
+						if (this.state.myinterface !== '') {
+
+							// Change message to validation while waiting for response
+							this.setState({
+								segment: SEGMENTS.VALIDATING,
+								myinterface: '',
+								block: true
+							});
+
+							let fetch_url = `${base_url}code=${this.state.myinterface}`;
 
 							const myOptions = {
 								method: 'GET',
@@ -141,39 +137,48 @@ class App extends Component {
 									if (response.sn === serialNum) {
 										this.setState({
 											segment: SEGMENTS.UNLOCKING,
-											interface: '',
+											myinterface: '',
 											block: true
 										});
 									} else {
 										this.setState({
 											segment: SEGMENTS.ERROR,
-											interface: ''
+											myinterface: '',
+											block: false
 										});
 									}
+								})
+								.catch(error => { // If there is no internet for example
+									console.log(error);
+									this.setState({
+										segment: SEGMENTS.ERROR,
+										myinterface: '',
+										block: false
+									});
 								});
 						}
 
 						return;
-					} else if (this.state.interface.length === 4) {
+					} else if (this.state.myinterface.length === 4) {
 						// try to unlock
-						if (this.state.interface === this.state.password) {
+						if (this.state.myinterface === this.state.password) {
 							this.setState({
 								segment: SEGMENTS.UNLOCKING,
-								interface: '',
+								myinterface: '',
 								block: true
 							});
 						} else {
 							this.setState({
 								segment: SEGMENTS.ERROR,
-								interface: ''
+								myinterface: ''
 							});
 						}
 						this.runTimeout();
 						return;
-					} else if (this.state.interface === '000000') {
+					} else if (this.state.myinterface === '000000') {
 						this.setState({
 							segment: SEGMENTS.SERVICE,
-							interface: ''
+							myinterface: ''
 						});
 						this.runTimeout();
 						return;
@@ -181,7 +186,7 @@ class App extends Component {
 				}
 				this.timeout = setTimeout(() => {
 					this.setState({
-						interface: '',
+						myinterface: '',
 						segment: SEGMENTS.BLANK,
 					});
 				}, 500);
@@ -206,7 +211,7 @@ class App extends Component {
 					<input
 						type="text"
 						className="value"
-						value={this.state.interface || this.state.segment}
+						value={this.state.myinterface || this.state.segment}
 						readOnly
 					/>
 				</div>
@@ -219,71 +224,5 @@ class App extends Component {
 		);
 	}
 }
-
-const Buttons = ({ handleClick }) => <div className="buttons_parent">
-	<div className="button_group">
-		<button onClick={handleClick} className="custom_btn" value="7">
-			7
-		</button>
-		<button onClick={handleClick} className="custom_btn" value="8">
-			8
-			<span className="bottom_right">
-				<i className="fas fa-arrow-up"></i>
-			</span>
-		</button>
-		<button onClick={handleClick} className="custom_btn" value="9">
-			9
-		</button>
-	</div>
-	<div className="button_group">
-		<button onClick={handleClick} className="custom_btn" value="4">
-			4
-			<span className="bottom_right">
-				<i className="fas fa-arrow-left"></i>
-			</span>
-		</button>
-		<button onClick={handleClick} className="custom_btn" value="5">
-			5
-		</button>
-		<button onClick={handleClick} className="custom_btn" value="6">
-			6
-			<span className="bottom_right">
-				<i className="fas fa-arrow-right"></i>
-			</span>
-		</button>
-	</div>
-	<div className="button_group">
-		<button onClick={handleClick} className="custom_btn" value="1">
-			1
-		</button>
-		<button onClick={handleClick} className="custom_btn" value="2">
-			2
-			<span className="bottom_right">
-				<i className="fas fa-arrow-down"></i>
-			</span>
-		</button>
-		<button onClick={handleClick} className="custom_btn" value="3">
-			3
-		</button>
-	</div>
-	<div className="button_group">
-		<button onClick={handleClick} className="custom_btn" value="R">
-			R
-			<span className="bottom_right">
-				B
-			</span>
-		</button>
-		<button onClick={handleClick} className="custom_btn" value="0">
-			0
-		</button>
-		<button onClick={handleClick} className="custom_btn" value="L">
-			L
-			<span className="bottom_right">
-				A
-			</span>
-		</button>
-	</div>
-</div>;
-
 
 export default App;
