@@ -68,6 +68,7 @@ input, textarea, select, button {
 }
 
 .panel {
+	position: relative;
 	margin: 40px 0;
 	width: 450px;
 	border-radius: 3px;
@@ -102,7 +103,7 @@ input, textarea, select, button {
 	outline: none;
 }
 
-.status {
+.lock_status {
 	color: transparent;
 	text-shadow: 0 0 0 black;
 	font-size: 16px;
@@ -146,6 +147,15 @@ input, textarea, select, button {
 .bottom_right {
 	color: #444641;
 	font-size: 12px;
+	position: absolute;
+	bottom: 5px;
+	right: 5px;
+}
+
+.serial_num {
+	color: #444641;
+	font-size: 12px;
+	font-weight: 900;
 	position: absolute;
 	bottom: 5px;
 	right: 5px;

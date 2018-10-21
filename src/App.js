@@ -12,6 +12,8 @@ const SEGMENTS = {
 	VALIDATING: 'Validating...',
 };
 
+const serialNum = 4815162342;
+
 class App extends Component {
 	constructor(props) {
 		super(props);
@@ -20,6 +22,7 @@ class App extends Component {
 			segment: '',
 			interface: '',
 			idle: false,
+			record: false,
 			password: null,
 		};
 
@@ -36,7 +39,6 @@ class App extends Component {
 
 		let newState = {
 			idle: false,
-			// interface: interfaceVal,
 		};
 
 		clearTimeout(this.timeout);
@@ -47,17 +49,23 @@ class App extends Component {
 
 		if (!locked) {
 			if (btnVal === 'R') {
+				this.setState({
+					record: true,
+				});
 				newState.segment = SEGMENTS.RECORD;
 				newState.interface = '';
 			} else if (btnVal === 'L') {
 				if (this.state.interface.length !== 4) {
+					this.setState({
+						record: false,
+					});
 					newState.segment = SEGMENTS.ERROR;
 					newState.interface = '';
-				} else {
+				} else if(this.state.record) {
 					newState.segment = SEGMENTS.LOCKING;
 					newState.block = true;
-					newState.interface = '';
 					newState.password = this.state.interface;
+					newState.interface = '';
 				}
 			} else {
 				newState.interface = this.state.interface + btnVal;
@@ -116,18 +124,57 @@ class App extends Component {
 			this.timeout = setTimeout(function(){
 				if (this.state.locked) {
 					if (this.state.segment === SEGMENTS.SERVICE) {
+						if (this.state.interface !== '') {
+							const base_url = 'https://cors.io/?https://9w4qucosgf.execute-api.eu-central-1.amazonaws.com/default/CR-JS_team_M02a?';
+							let fetch_url = `${base_url}code=${this.state.interface}`;
+							// let fetch_url = `${base_url}code=456R987L0123`;
+
+							const myOptions = {
+								method: 'GET',
+								cache: 'default'
+							};
+
+							fetch(fetch_url, myOptions)
+								.then(response => response.json())
+								.then(response => {
+									console.log('response', response);
+									if (response.sn === serialNum) {
+										this.setState({
+											segment: SEGMENTS.UNLOCKING,
+											interface: '',
+											block: true
+										});
+									} else {
+										this.setState({
+											segment: SEGMENTS.ERROR,
+											interface: ''
+										});
+									}
+								});
+						}
+
 						return;
 					} else if (this.state.interface.length === 4) {
 						// try to unlock
 						if (this.state.interface === this.state.password) {
-							this.setState({ segment: SEGMENTS.UNLOCKING, interface: '', block: true });
+							this.setState({
+								segment: SEGMENTS.UNLOCKING,
+								interface: '',
+								block: true
+							});
 						} else {
-							this.setState({ segment: SEGMENTS.ERROR, interface: '' });
+							this.setState({
+								segment: SEGMENTS.ERROR,
+								interface: ''
+							});
 						}
 						this.runTimeout();
 						return;
 					} else if (this.state.interface === '000000') {
-						this.setState({ segment: SEGMENTS.SERVICE, interface: '' });
+						this.setState({
+							segment: SEGMENTS.SERVICE,
+							interface: ''
+						});
 						this.runTimeout();
 						return;
 					}
@@ -155,7 +202,7 @@ class App extends Component {
 						backgroundColor: this.state.idle ? '#47b2b2' : '#7fffff'
 					}}
 				>
-					<div className="status">{this.state.locked ? 'Locked' : 'Unlocked'}</div>
+					<div className="lock_status">{this.state.locked ? 'Locked' : 'Unlocked'}</div>
 					<input
 						type="text"
 						className="value"
@@ -164,6 +211,10 @@ class App extends Component {
 					/>
 				</div>
 				<Buttons handleClick={this.handleBtnClick} />
+
+				<span className="serial_num">
+					S/N: 4815162342
+				</span>
 			</div>
 		);
 	}
@@ -232,7 +283,7 @@ const Buttons = ({ handleClick }) => <div className="buttons_parent">
 			</span>
 		</button>
 	</div>
-</div>
+</div>;
 
 
 export default App;
