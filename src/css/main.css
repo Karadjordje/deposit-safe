@@ -77,7 +77,7 @@ input, textarea, select, button {
 	box-shadow: 0px 0px 5px 0px rgba(0,0,0,1);
 }
 
-.screen {
+.panel__screen {
 	position: relative;
 	display: flex;
 	justify-content: flex-end;
@@ -92,7 +92,7 @@ input, textarea, select, button {
 	box-shadow: inset 0px 0px 5px 0px rgba(0,0,0,1);
 }
 
-.value {
+.panel__value {
 	color: transparent;
 	text-shadow: 0 0 0 black;
 	width: 100%;
@@ -103,7 +103,7 @@ input, textarea, select, button {
 	outline: none;
 }
 
-.lock_status {
+.panel__status {
 	color: transparent;
 	text-shadow: 0 0 0 black;
 	font-size: 16px;
@@ -115,17 +115,17 @@ input, textarea, select, button {
 	outline: none;
 }
 
-.button_group {
+.screen__group {
 	display: flex;
 	justify-content: space-between;
 	margin-bottom: 13px;
 }
 
-.button_group:last-child {
+.screen__group:last-child {
 	margin-bottom: 0;
 }
 
-.custom_btn {
+.screen__btn {
 	position: relative;
 	color: #f3f3f3;
 	font-size: 60px;
@@ -139,12 +139,12 @@ input, textarea, select, button {
 	outline: none;
 }
 
-.custom_btn:active {
+.screen__btn:active {
 	box-shadow: none;
    	outline: none;
 }
 
-.bottom_right {
+.screen__icon {
 	color: #444641;
 	font-size: 12px;
 	position: absolute;
@@ -152,7 +152,7 @@ input, textarea, select, button {
 	right: 5px;
 }
 
-.serial_num {
+.panel__serial {
 	color: #444641;
 	font-size: 12px;
 	font-weight: 900;

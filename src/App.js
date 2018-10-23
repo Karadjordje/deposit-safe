@@ -19,6 +19,7 @@ class App extends Component {
 		this.handleBtnClick = this.handleBtnClick.bind(this);
 		this.idleUser = this.idleUser.bind(this);
 		this.runTimeout = this.runTimeout.bind(this);
+		this.fetchData = this.fetchData.bind(this);
 	}
 
 	handleBtnClick(e) {
@@ -65,31 +66,6 @@ class App extends Component {
 		}
 
 		this.setState(newState, this.runTimeout);
-		// unlocked
-			// record
-				// cetri broja ->
-					// locked
-						// locking blockira 3 sekunde
-							// locked
-			// blank
-				// do nothing
-		// locked
-			// blank
-				// cetri karaakter
-					// false
-						// Error state
-					// true
-						// otkucava blokira 3 sekune
-							// unlock
-				// timeout clear za 1. sekund inactivity
-				// 000000
-					// service mode
-						// blank
-						// service code
-							// salje api zahtev sa service code
-							// validate
-								// error
-								// unlocked
 		this.idleUser();
 	}
 
@@ -98,6 +74,49 @@ class App extends Component {
 		this.idleUserTimer = setTimeout(() => {
 			this.setState({ idle: true });
 		}, 5000);
+	}
+
+	fetchData() {
+		// Change message to validation while waiting for response
+		this.setState({
+			segment: SEGMENTS.VALIDATING,
+			myinterface: '',
+			block: true
+		});
+
+		let fetch_url = `${base_url}code=${this.state.myinterface}`;
+
+		const myOptions = {
+			method: 'GET',
+			cache: 'default'
+		};
+
+		fetch(fetch_url, myOptions)
+			.then(response => response.json())
+			.then(response => {
+				console.log('response', response);
+				if (response.sn === serialNum) {
+					this.setState({
+						segment: SEGMENTS.UNLOCKING,
+						myinterface: '',
+						block: true
+					});
+				} else {
+					this.setState({
+						segment: SEGMENTS.ERROR,
+						myinterface: '',
+						block: false
+					});
+				}
+			})
+			.catch(error => { // If there is no internet for example
+				console.log(error);
+				this.setState({
+					segment: SEGMENTS.ERROR,
+					myinterface: '',
+					block: false
+				});
+			});
 	}
 
 	runTimeout() {
@@ -115,49 +134,8 @@ class App extends Component {
 				if (this.state.locked) {
 					if (this.state.segment === SEGMENTS.SERVICE) {
 						if (this.state.myinterface !== '') {
-
-							// Change message to validation while waiting for response
-							this.setState({
-								segment: SEGMENTS.VALIDATING,
-								myinterface: '',
-								block: true
-							});
-
-							let fetch_url = `${base_url}code=${this.state.myinterface}`;
-
-							const myOptions = {
-								method: 'GET',
-								cache: 'default'
-							};
-
-							fetch(fetch_url, myOptions)
-								.then(response => response.json())
-								.then(response => {
-									console.log('response', response);
-									if (response.sn === serialNum) {
-										this.setState({
-											segment: SEGMENTS.UNLOCKING,
-											myinterface: '',
-											block: true
-										});
-									} else {
-										this.setState({
-											segment: SEGMENTS.ERROR,
-											myinterface: '',
-											block: false
-										});
-									}
-								})
-								.catch(error => { // If there is no internet for example
-									console.log(error);
-									this.setState({
-										segment: SEGMENTS.ERROR,
-										myinterface: '',
-										block: false
-									});
-								});
+							this.fetchData();
 						}
-
 						return;
 					} else if (this.state.myinterface.length === 4) {
 						// try to unlock
@@ -202,22 +180,22 @@ class App extends Component {
 		return (
 			<div className="panel">
 				<div
-					className="screen"
+					className="panel__screen"
 					style={{
 						backgroundColor: this.state.idle ? '#47b2b2' : '#7fffff'
 					}}
 				>
-					<div className="lock_status">{this.state.locked ? 'Locked' : 'Unlocked'}</div>
+					<div className="panel__status">{this.state.locked ? 'Locked' : 'Unlocked'}</div>
 					<input
 						type="text"
-						className="value"
+						className="panel__value"
 						value={this.state.myinterface || this.state.segment}
 						readOnly
 					/>
 				</div>
 				<Buttons handleClick={this.handleBtnClick} />
 
-				<span className="serial_num">
+				<span className="panel__serial">
 					S/N: 4815162342
 				</span>
 			</div>
