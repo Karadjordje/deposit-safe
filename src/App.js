@@ -39,7 +39,7 @@ class App extends Component {
 		clearTimeout(this.timeout);
 
 		if (!locked) {
-			if (btnVal === 'R') {
+			if (btnVal === 'R') { //test
 				this.setState({
 					record: true,
 				});
